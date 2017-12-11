@@ -27,6 +27,7 @@ var TreeComponent = React.createClass({
             this.props.toggleGraph('hide');
         }
         var item = data.instance.get_node(data.node.id);
+        console.log(item)
         var selected = data.instance.get_selected(true);
         var selected_equipment_ids = selected.filter(
                 function(selected_item) {
@@ -36,6 +37,11 @@ var TreeComponent = React.createClass({
                 }
             );
         this.props.onTreeNodeClick(item.state, selected_equipment_ids);
+        
+        if (data.event){
+            $("#tree .active").removeClass("active");
+            $(data.event.currentTarget).addClass("active");
+        }
         e.stopPropagation();
     },
 
@@ -494,6 +500,8 @@ function getContextMenu(toggleGraph, loadGraph, loadInfo, loadReport) {
                                 , "last", function (new_node) {
                                     setTimeout(function () {
                                         new_node.state.id = data.id;
+                                        new_node.state.equipment_id = data.id;
+                                        new_node.equipment_id = data.id;
                                         inst.edit(new_node);
                                     }, 0);
                                 });
@@ -507,7 +515,9 @@ function getContextMenu(toggleGraph, loadGraph, loadInfo, loadReport) {
                 "separator_after": true
                 , "label": "Equipment"
                 , "action": function (data) {
-                    window.location.href = '#/equipment'
+                    var inst = $.jstree.reference(data.reference),
+                        obj = inst.get_node(data.reference);
+                    window.location.href = '#/equipment?location=' + obj.state.location_id;
                 }
                 // var inst = $.jstree.reference(data.reference),
                 //     obj = inst.get_node(data.reference);
@@ -574,6 +584,8 @@ function getContextMenu(toggleGraph, loadGraph, loadInfo, loadReport) {
                 "action": function (node) {
                     var inst = $.jstree.reference(node.reference),
                         obj = inst.get_node(node.reference);
+                    $("#tree .active").removeClass("active");
+                    $(node.reference).addClass("active");
                     toggleGraph();
                     loadGraph(obj.state.equipment_id);
                 }
@@ -585,6 +597,8 @@ function getContextMenu(toggleGraph, loadGraph, loadInfo, loadReport) {
                 "action": function (node) {
                     var inst = $.jstree.reference(node.reference),
                         obj = inst.get_node(node.reference);
+                    $("#tree .active").removeClass("active");
+                    $(node.reference).addClass("active");
                     loadInfo(obj.state.equipment_id);
                 }
             }
@@ -596,8 +610,18 @@ function getContextMenu(toggleGraph, loadGraph, loadInfo, loadReport) {
                     var inst = $.jstree.reference(node.reference),
                         obj = inst.get_node(node.reference);
                     //window.location.href = '#/equipment_report/' + obj.state.equipment_id;
-                    console.log("click")
                     loadReport(obj.state.equipment_id)
+                }
+            }
+        tmp['results'] = {
+                'label': 'Test Result Table'
+                , "separator_before": false    // Insert a separator before the item
+                , "separator_after": true,     // Insert a separator after the item
+                "action": function (node) {
+                    var inst = $.jstree.reference(node.reference),
+                        obj = inst.get_node(node.reference);
+                    window.location.href = '#/equipment_results/' + obj.state.equipment_id;
+                    
                 }
             }
 
